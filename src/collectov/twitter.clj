@@ -12,14 +12,36 @@
 
 
 (def creds
-  (oauth/make-oauth-creds
+  (apply oauth/make-oauth-creds
    (vals (get-in config [:config :twitter-oauth]))))
+
+(def users
+  (get-in config [:config :twitter-users]))
 
 (defonce last-tweet (atom {:text nil}))
 
 (defn get-timeline [& cnt]
   (let [timeline (t/statuses-home-timeline :oauth-creds creds :params {:exclude-replies true :count 40})]
   (map :text (:body timeline))))
+
+(defn user-tweets [user & cnt]
+  (let [tweets (t/statuses-user-timeline
+                :oauth-creds creds
+                :params {:screen-name user
+                         :trim-user true
+                         :exclude-replies true
+                         :include-rts false
+                         :count 7})]
+    (map :text (:body tweets))))
+
+
+
+
+
+(defn fetch-tweets []
+  (do
+    (flatten (map user-tweets users))))
+
 
 (defn build-corpus []
   (st/join " "
