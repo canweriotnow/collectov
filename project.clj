@@ -8,4 +8,7 @@
                  [schejulure "0.1.4"]]
   :main ^:skip-aot collectov.core
   :target-path "target/%s"
-  :profiles {:uberjar {:aot :all}})
+  :profiles {:dev {:dependencies [[speclj "2.5.0"]]}
+             :uberjar {:aot :all}}
+  :plugins [[speclj "2.5.0"]]
+  :test-paths ["spec"])
