@@ -30,11 +30,14 @@
         (clojure.string/join " " nacc)
         (recur nws nacc)))))
 
-
+;; TODO Re-write the generate fn to create tweet-friendly phrases.
 (defn generate []
   (let [d (markov-data (corpus))]
     (clojure.string/join " " (take 6 (repeatedly #(sentence d))))))
 
-(def txt (apply str (take 140 (generate))))
+(defn tweetify []
+  (apply str (take 140 (generate))))
+
+
 
 

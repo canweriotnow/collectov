@@ -6,7 +6,7 @@
             [twitter.callbacks.handlers :refer :all]
             [twitter.api.restful :as t]))
 
-(def config
+(defonce config
   (edn/read-string (slurp "resources/config.edn")))
 
 
@@ -20,11 +20,11 @@
 
 (defonce last-tweet (atom {:text nil}))
 
-(defn get-timeline [& cnt]
-  (let [timeline (t/statuses-home-timeline :oauth-creds creds :params {:exclude-replies true :count 40})]
-  (map :text (:body timeline))))
 
-(defn user-tweets [user & cnt]
+(defn user-tweets
+  "Get the last n tweets for the specified user.
+   Default is 7. TODO: make this configurable."
+  [user & cnt]
   (let [tweets (t/statuses-user-timeline
                 :oauth-creds creds
                 :params {:screen-name user
@@ -38,12 +38,19 @@
 
 
 
-(defn fetch-tweets []
+(defn fetch-tweets
+  "Get the tweets for all the users."
+  []
   (do
-    (flatten (map user-tweets users))))
+    (shuffle (flatten (map user-tweets users)))))
 
 
-(defn build-corpus []
+(defn build-corpus
+  "Uses retrieved tweets to build a corpus for the Markov
+   chain function. Filters out links, usernames, and 'RT'
+   just b/c it's annoying and tends to break up otherwise
+   hilarious bodies of text."
+  []
   (st/join " "
    (filter
     #(not
@@ -51,7 +58,7 @@
        (re-matches #"@\S+" %)
        (re-matches #"http\S+" %)
        (re-matches #"RT" %)))
-    (st/split (st/join " " (get-timeline)) #" "))))
+    (st/split (st/join " " (fetch-tweets)) #" "))))
 
 (defn send-tweet [tweet]
   (if-not (identical? tweet (:text @last-tweet))
@@ -59,6 +66,8 @@
       (do
         (t/statuses-update :oauth-creds creds :params {:status tweet})
         (swap! last-tweet #(assoc % :text tweet)))
-    (catch Exception e (str "caught exception: " (.getMessage e))))))
+    (catch Exception e
+      (println
+       (str "caught exception: " (.getMessage e)))))))
 
 

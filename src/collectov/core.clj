@@ -1,7 +1,13 @@
 (ns collectov.core
+  (:require [collectov.markov :as m]
+            [collectov.twitter :as tw]
+            [schejulure.core :refer :all])
   (:gen-class))
 
+(defn- tweet []
+  (tw/send-tweet (m/tweetify)))
+
 (defn -main
-  "I don't do a whole lot ... yet."
+  "Just gonna tweet!"
   [& args]
-  (println "Hello, World!"))
+  (schedule {:minute [0 20 30 45]} tweet))
