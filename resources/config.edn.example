@@ -1,0 +1,8 @@
+{:config
+ {:twitter-oauth
+  {:consumer-key "Twitter Consumer Key"
+   :consumer-secret "Twitter Consumer Secret"
+   :access-token "Twitter Access Token"
+   :access-token-secret "Twitter Access Token Secret"}
+ :twitter-users
+  ["vector" "of" "twitter" "handles"]}}
